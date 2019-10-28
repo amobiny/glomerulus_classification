@@ -22,7 +22,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+os.environ['CUDA_VISIBLE_DEVICES'] = '1, 2, 3'
 
 
 def log_string(out_str):
@@ -121,10 +121,10 @@ def visualize(model, dataloader, grad_cam_hooks):
             fig, ax = plt.subplots(1, 2)
             ax[0].set_title('Original image', fontsize=10)
             img = img.view(img.shape[1], img.shape[2], img.shape[0])
-            ax[0].imshow(img, cmap='gray')
+            ax[0].imshow(img.cpu().numpy(), cmap='gray')
             ax[1].set_title('Top class activation')
-            ax[1].imshow(img.squeeze(), cmap='gray')
-            ax[1].imshow(mask.squeeze(), cmap='jet', alpha=0.5)
+            ax[1].imshow(img.squeeze().cpu().numpy(), cmap='gray')
+            ax[1].imshow(mask.squeeze().detach().cpu().numpy(), cmap='jet', alpha=0.5)
             print(1)
             plt.savefig(os.path.join(save_dir, '{}-{}.png'.format(batch_idx, img_id)), dpi=300, bbox_inches='tight')
 
@@ -147,12 +147,12 @@ if __name__ == '__main__':
     # Create the model
     ##################################
     if options.model == 'resnet':
-        net = resnet.resnet34(pretrained=True)
+        net = resnet.resnet34()
         net.fc = nn.Linear(net.fc.in_features, options.num_classes)
         grad_cam_hooks = {'forward': net.layer4, 'backward': net.fc}
 
     elif options.model == 'densenet':
-        net = densenet.densenet121(pretrained=True)
+        net = densenet.densenet121()
         net.classifier = nn.Linear(net.classifier.in_features, out_features=options.num_classes)
         grad_cam_hooks = {'forward': net.features.norm5, 'backward': net.classifier}
 
@@ -206,4 +206,4 @@ if __name__ == '__main__':
     #################################
     # Grad Cam visualizer
     #################################
-    visualize(net, test_loader, grad_cam_hooks)
+    # visualize(net, test_loader, grad_cam_hooks)

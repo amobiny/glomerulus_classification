@@ -22,6 +22,12 @@ class Data:
     def __getitem__(self, index):
 
         img = torch.tensor(self.images[index]).div(255.).float()
+        if self.labels[index] == 2:
+            self.labels[index] = 1
+        if self.labels[index] == 4:
+            self.labels[index] = 2
+        if self.labels[index] == 3:
+            self.labels[index] = 2
         target = torch.tensor(self.labels[index])
 
         if self.mode == 'train':

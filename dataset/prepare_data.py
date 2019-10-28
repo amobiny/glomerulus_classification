@@ -102,6 +102,11 @@ def split(scan_count, splits=(0.8, 0.2)):
     return train, test
 
 
+subject_glom_dict.pop('1')
+# subject_glom_dict.pop('2')
+# subject_glom_dict.pop('3')
+
+
 train_list, test_list = [], []
 for key in subject_glom_dict.keys():
     train, test = split(subject_glom_dict[key])
@@ -120,7 +125,7 @@ x_test = np.array(data[[i for i, e in enumerate(subject_ids) if e in test_scans]
 y_test = np.array(labels[[i for i, e in enumerate(subject_ids) if e in test_scans]])
 
 
-h5f = h5py.File('data.h5', 'w')
+h5f = h5py.File('data_4.h5', 'w')
 h5f.create_dataset('x_train', data=x_train)
 h5f.create_dataset('y_train', data=y_train)
 h5f.create_dataset('x_test', data=x_test)
