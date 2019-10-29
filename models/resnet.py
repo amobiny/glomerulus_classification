@@ -5,7 +5,7 @@ import torch.utils.model_zoo as model_zoo
 from models.blocks import CBAMLayer, SPPLayer
 import logging
 
-__all__ = ['resnet34',      'resnet50',      'resnet101',      'resnet152',
+__all__ = ['ResNet', 'resnet34',      'resnet50',      'resnet101',      'resnet152',
            'resnet34_cbam', 'resnet50_cbam', 'resnet101_cbam', 'resnet152_cbam']
 
 

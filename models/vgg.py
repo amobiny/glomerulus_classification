@@ -6,7 +6,7 @@ from models.blocks import SPPLayer
 import logging
 
 
-__all__ = ['vgg19_bn', 'vgg19']
+__all__ = ['VGG', 'vgg19_bn', 'vgg19']
 
 
 model_urls = {
@@ -20,9 +20,20 @@ class VGG(nn.Module):
     def __init__(self, features, num_classes=1000, init_weights=True):
         super(VGG, self).__init__()
         self.features = features
-        self.spp = SPPLayer(pool_size=[1, 2, 4], pool=nn.MaxPool2d)
+        # self.spp = SPPLayer(pool_size=[1, 2, 4], pool=nn.MaxPool2d)
+        self.avgpool = nn.AdaptiveAvgPool2d((7, 7))
+        # self.fc = nn.Sequential(
+        #     nn.Linear(512 * 7 * 7, 4096),
+        #     nn.ReLU(True),
+        #     nn.Dropout(),
+        #     nn.Linear(4096, 4096),
+        #     nn.ReLU(True),
+        #     nn.Dropout(),
+        #     nn.Linear(4096, num_classes),
+        # )
+
         self.fc = nn.Sequential(
-            nn.Linear(512 * self.spp.out_length, 1024),
+            nn.Linear(512 * 7 * 7, 1024),
             nn.ReLU(True),
             nn.Dropout(),
             nn.Linear(1024, num_classes))
@@ -32,7 +43,8 @@ class VGG(nn.Module):
 
     def forward(self, x):
         x = self.features(x)
-        x = self.spp(x)
+        x = self.avgpool(x)
+        x = torch.flatten(x, 1)
         x = self.fc(x)
         return x
 

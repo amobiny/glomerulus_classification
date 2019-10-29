@@ -1,27 +1,32 @@
 import PIL
-from torchvision import datasets, transforms
+from torchvision import transforms
 import h5py
 import torch
 import numpy as np
 from config import options
+from torch.utils.data import Dataset
 
 
-class Data:
-    def __init__(self, mode='train'):
+class Data(Dataset):
+    def __init__(self, mode='train', data_len=None):
 
         h5f = h5py.File('/home/cougarnet.uh.edu/amobiny/Desktop/glomerulus_classification/dataset/data.h5', 'r')
         self.mode = mode
         if mode == 'train':
-            self.images = np.transpose(h5f['x_train'][:], [0, 3, 1, 2])
-            self.labels = h5f['y_train'][:].astype(int)
+            self.images = np.transpose(h5f['x_train'][:], [0, 3, 1, 2]).astype(int)[:data_len]
+            self.labels = h5f['y_train'][:].astype(int)[:data_len]
         elif mode == 'test':
-            self.images = np.transpose(h5f['x_test'][:], [0, 3, 1, 2])
-            self.labels = h5f['y_test'][:].astype(int)
+            self.images = np.transpose(h5f['x_test'][:], [0, 3, 1, 2]).astype(int)[:data_len]
+            self.labels = h5f['y_test'][:].astype(int)[:data_len]
         h5f.close()
 
     def __getitem__(self, index):
 
-        img = torch.tensor(self.images[index]).div(255.).float()
+        # img = torch.tensor(self.images[index]).div(255.).float()
+
+        img = torch.tensor(self.images[index]).float()
+        img = (img - img.min()) / (img.max() - img.min())
+
         if self.labels[index] == 2:
             self.labels[index] = 1
         if self.labels[index] == 4:
@@ -35,6 +40,7 @@ class Data:
             img = transforms.ToPILImage()(img)
             img = transforms.RandomHorizontalFlip()(img)
             img = transforms.RandomVerticalFlip()(img)
+            img = transforms.ColorJitter(brightness=0.5, contrast=0.5, hue=.05, saturation=.05)(img)
             # img = transforms.RandomResizedCrop(options.img_h, scale=(0.7, 1.))(img)
             # img = transforms.RandomRotation(90, resample=PIL.Image.BICUBIC)(img)
             img = transforms.ToTensor()(img)
