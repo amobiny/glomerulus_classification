@@ -6,8 +6,10 @@ import skimage.transform
 import operator
 import itertools
 import h5py
+import json
 
 imgs_dir = '/home/cougarnet.uh.edu/amobiny/Desktop/masks'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 img_name_list = glob.glob(os.path.join(imgs_dir+"/*.jpg"))
 new_w, new_h = 256, 256
@@ -99,6 +101,7 @@ def split(scan_count, splits=(0.8, 0.2)):
     train = approx_with_accounting_and_duplicates(num_imgs, int(splits[0] * total))[2]
     num_imgs = [a for a in num_imgs if a not in train]
     test = num_imgs
+
     return train, test
 
 
@@ -110,8 +113,16 @@ subject_glom_dict.pop('1')
 train_list, test_list = [], []
 for key in subject_glom_dict.keys():
     train, test = split(subject_glom_dict[key])
+
+    # add labels
+    train = [train[i] + tuple(str(subject_label_dict[train[i][0]])) for i in range(len(train))]
+    test = [test[i] + tuple(str(subject_label_dict[test[i][0]])) for i in range(len(test))]
+
     train_list.append(train)
     test_list.append(test)
+
+with open(os.path.join(BASE_DIR, 'splits.json'), 'w') as f:
+    json.dump({'train': train_list, 'test': test_list}, f)
 
 train_list = list(itertools.chain(*train_list))
 test_list = list(itertools.chain(*test_list))
@@ -120,22 +131,40 @@ test_scans = [tuple_[0] for tuple_ in test_list]
 
 x_train = np.array(data[[i for i, e in enumerate(subject_ids) if e in train_scans]])
 y_train = np.array(labels[[i for i, e in enumerate(subject_ids) if e in train_scans]])
+name_train = np.array([[tuple_[0]]*tuple_[1] for tuple_ in train_list])
 
 x_test = np.array(data[[i for i, e in enumerate(subject_ids) if e in test_scans]])
 y_test = np.array(labels[[i for i, e in enumerate(subject_ids) if e in test_scans]])
+name_test = np.array([[tuple_[0]]*tuple_[1] for tuple_ in test_list])
 
 
-h5f = h5py.File('data_4.h5', 'w')
+# for i, y in enumerate(y_train):
+#     if y_train[i] == 2:
+#         y_train[i] = 1
+#     elif y_train[i] == 3:
+#         y_train[i] = 2
+#     elif y_train[i] == 4:
+#         y_train[i] = 3
+#
+# for i, y in enumerate(y_test):
+#     if y_test[i] == 2:
+#         y_test[i] = 1
+#     elif y_test[i] == 3:
+#         y_test[i] = 2
+#     elif y_test[i] == 4:
+#         y_test[i] = 3
+
+h5f = h5py.File('data_5C.h5', 'w')
 h5f.create_dataset('x_train', data=x_train)
 h5f.create_dataset('y_train', data=y_train)
+h5f.create_dataset('name_train', data=name_train)
 h5f.create_dataset('x_test', data=x_test)
 h5f.create_dataset('y_test', data=y_test)
+h5f.create_dataset('name_test', data=name_test)
 h5f.close()
 
-
-
-
-
+# with open(os.path.join(BASE_DIR, 'splits.json'), 'r') as f:
+#     scan_names = json.load(f)['train']
 
 
 

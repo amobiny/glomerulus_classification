@@ -43,7 +43,7 @@ parser.add_option('--gc', '--gradcam', dest='gradcam', default=True,
 
 parser.add_option('--lp', '--load_model_path', dest='load_model_path',
                   default='/home/cougarnet.uh.edu/amobiny/Desktop/glomerulus_classification/'
-                          'save/20191029_141712/models/677.ckpt',
+                          'save/20191029_150936/models/677.ckpt',
                   help='path to load a .ckpt model')
 
 
