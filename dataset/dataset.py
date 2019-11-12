@@ -10,15 +10,30 @@ from torch.utils.data import Dataset
 class Data(Dataset):
     def __init__(self, mode='train', data_len=None):
 
-        h5f = h5py.File('/home/cougarnet.uh.edu/amobiny/Desktop/glomerulus_classification/dataset/data.h5', 'r')
         self.mode = mode
         if mode == 'train':
-            self.images = np.transpose(h5f['x_train'][:], [0, 3, 1, 2]).astype(int)[:data_len]
-            self.labels = h5f['y_train'][:].astype(int)[:data_len]
+            print('Loading the training data...')
+            train_idx = list(range(10))
+            train_idx.remove(options.loos)
+            images = np.zeros((0, options.img_c, options.img_h, options.img_w))
+            labels = np.array([])
+            for idx in train_idx:
+                h5f = h5py.File('/home/cougarnet.uh.edu/amobiny/Desktop/'
+                                'glomerulus_classification/dataset/data_5C_{}.h5'.format(idx), 'r')
+                x = np.transpose(h5f['x'][:], [0, 3, 1, 2]).astype(int)
+                y = h5f['y'][:].astype(int)
+                images = np.concatenate((images, x), axis=0)
+                labels = np.append(labels, y)
+                h5f.close()
+            self.images = images
+            self.labels = labels
         elif mode == 'test':
-            self.images = np.transpose(h5f['x_test'][:], [0, 3, 1, 2]).astype(int)[:data_len]
-            self.labels = h5f['y_test'][:].astype(int)[:data_len]
-        h5f.close()
+            print('Loading the test data...')
+            h5f = h5py.File('/home/cougarnet.uh.edu/amobiny/Desktop/'
+                            'glomerulus_classification/dataset/data_5C_{}.h5'.format(options.loos), 'r')
+            self.images = np.transpose(h5f['x'][:], [0, 3, 1, 2]).astype(int)[:data_len]
+            self.labels = h5f['y'][:].astype(int)[:data_len]
+            h5f.close()
 
     def __getitem__(self, index):
 

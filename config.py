@@ -27,6 +27,8 @@ parser.add_option('--ic', '--img_c', dest='img_c', default=3, type='int',
                   help='number of input channels (default: 3)')
 parser.add_option('--nc', '--num_classes', dest='num_classes', default=3, type='int',
                   help='number of classes (default: 10)')
+parser.add_option('--loos', '--loos', dest='loos', default=9, type='int',
+                  help='index of the set to leave out for testing (default: 9)')
 
 # For model
 parser.add_option('--m', '--model', dest='model', default='densenet',
